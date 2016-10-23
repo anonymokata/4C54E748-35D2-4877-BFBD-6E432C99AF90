@@ -4,31 +4,49 @@
 #include <check.h>
 #include <string.h>
 
-START_TEST (test0)
+static void check_infix2rpn(const char * input_str, const char * gold_result)
 {
-  const char * input_str = "a+b-c";
-
   const char * converted = infix2rpn_convert(
     input_str, strlen(input_str));
-  
-  const char * gold_result = "abc-+";
-
   ck_assert_str_eq(converted, gold_result);
+}
+
+START_TEST (test0)
+{
+  check_infix2rpn("a+b-c", "abc-+");
 }
 END_TEST
 
 START_TEST (test1)
 {
-  const char * input_str = "(a+b)-c";
-
-  const char * converted = infix2rpn_convert(
-    input_str, strlen(input_str));
-  
-  const char * gold_result = "ab+c-";
-
-  ck_assert_str_eq(converted, gold_result);
+  check_infix2rpn("(a+b)-c", "ab+c-");
 }
 END_TEST
+
+START_TEST (test2)
+{
+  check_infix2rpn("l/m^n*o-p", "lmn^/o*p-");
+}
+END_TEST
+
+START_TEST (test3)
+{
+  check_infix2rpn("((l/(m^n))*o)-p", "lmn^/o*p-");
+}
+END_TEST
+
+START_TEST (test4)
+{
+  check_infix2rpn("((v/w)^x)*(y-z)", "vw/x^yz-*");
+}
+END_TEST
+
+START_TEST (test5)
+{
+  check_infix2rpn("(a+g)*(((b-a)+c)^(c+(e*(d^f))))", "ag+ba-c+cedf^*+^*");
+}
+END_TEST
+
 
 Suite * infix2rpn_suite(void)
 {
@@ -40,6 +58,10 @@ Suite * infix2rpn_suite(void)
 
   tcase_add_test(tc_core, test0);
   tcase_add_test(tc_core, test1);
+  tcase_add_test(tc_core, test2);
+  tcase_add_test(tc_core, test3);
+  tcase_add_test(tc_core, test4);
+  tcase_add_test(tc_core, test5);
   suite_add_tcase(s, tc_core);
 
   return s;

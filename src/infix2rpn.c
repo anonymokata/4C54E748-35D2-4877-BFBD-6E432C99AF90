@@ -11,45 +11,55 @@ static int infix2rpn_getPrecedence(char c)
   switch(c)
   {
     case '^':
-      return 1;
+      return 5;
     case '/':
-      return 2;
+      return 4;
     case '*':
       return 3;
     case '-':
-      return 4;
+      return 2;
     case '+':
-      return 5;
+      return 1;
+    case '(':
+      return 0;
   }
 }
-
-/*
-static int infix2rpn_findBasicExpIndex(const char * input, int input_len)
-{
-  for(int i = 1; i < input_len - 1; ++i)
-  {
-    if(infix2rpn_isOperator(input[i]))
-    {
-      if(input[i-1] != '(' && input[i+1] != ')')
-      {
-        return i;
-      }
-    }
-  }
-  return -1;
-}
-*/
 
 static int infix2rpn_isOperator(char c)
 {
   if(c == '^' || c == '/' || c == '*' ||
-     c == '-' || c == '+' || c == '(')
+     c == '-' || c == '+')
   {
     return true;
   }
   else
   {
     return false;
+  }
+}
+
+void printVector(vector_char vec)
+{
+  for(int i = 0; i < vectorChar_size(vec); ++i)
+  {
+    printf("%c ", vectorChar_element(vec, i));
+  }
+  printf("\n");
+}
+
+void infix2rpn_getPrecedencePair(vector_char vec, char token, int * prec_top, 
+  int * prec_token)
+{
+  if(vectorChar_size(vec) > 0)
+  {
+    char vector_top = vectorChar_element(vec, vectorChar_size(vec) - 1);
+    *prec_top = infix2rpn_getPrecedence(vector_top);
+    *prec_token = infix2rpn_getPrecedence(token);
+  }
+  else
+  {
+    *prec_top = -2;
+    *prec_token = -1;
   }
 }
 
@@ -65,47 +75,52 @@ const char * infix2rpn_convert(const char * input, int input_len)
   for(int i = 0; i < input_len; ++i)
   {
     char token = input[i];
+
     if(infix2rpn_isOperator(token))
     {
-      if(vectorChar_size(op_stack) > 0)
-      {
-        char vector_top = vectorChar_element(op_stack, 
-          vectorChar_size(op_stack) - 1);
+      int prec_top;
+      int prec_token;
 
-        int prec_top = infix2rpn_getPrecedence(vector_top);
-        int prec_token = infix2rpn_getPrecedence(token);
+      infix2rpn_getPrecedencePair(op_stack, token, &prec_top, &prec_token);
 
-        if(prec_token <= prec_top)
-        {
-          vectorChar_pushBack(op_stack, token);
-        }
-        else
-        {
-          vectorChar_pushBack(output_vec, vector_top);
-          vectorChar_popBack(op_stack);
-          vectorChar_pushBack(op_stack, token);
-        }
-      }
-      else 
+      while(prec_token <= prec_top)
       {
-        vectorChar_pushBack(op_stack, token);
-      }
-    } 
-    else if(token == ')')
-    {
-      while(vectorChar_size(op_stack) > 0)
-      {
-        char vector_top = vectorChar_element(op_stack, 
-          vectorChar_size(op_stack) - 1);
+        char vector_top = 
+          vectorChar_element(op_stack, vectorChar_size(op_stack) - 1);
         vectorChar_pushBack(output_vec, vector_top);
         vectorChar_popBack(op_stack);
-        if(vector_top == '(')
+
+        infix2rpn_getPrecedencePair(op_stack, token, &prec_top, &prec_token);
+      }
+
+      vectorChar_pushBack(op_stack, token);
+    }
+    else if(token == '(')
+    {
+      vectorChar_pushBack(op_stack, token);
+    }
+    else if(token == ')')
+    {
+      token = vectorChar_element(op_stack, vectorChar_size(op_stack) - 1);
+      while(token != '(')
+      {
+        vectorChar_pushBack(output_vec, token);
+        vectorChar_popBack(op_stack);
+        if(vectorChar_size(op_stack) > 0)
+        {
+          token = vectorChar_element(op_stack, vectorChar_size(op_stack) - 1);
+        }
+        else
         {
           break;
         }
       }
+      if(token == '(')
+      {
+        vectorChar_popBack(op_stack);
+      }
     }
-    else
+    else 
     {
       vectorChar_pushBack(output_vec, token);
     }
@@ -119,12 +134,11 @@ const char * infix2rpn_convert(const char * input, int input_len)
   }
 
   int output_len = vectorChar_size(output_vec);
-  char * retval = (char *) malloc(sizeof(char) * output_len);   
+  char * retval = (char *) malloc(sizeof(char) * (output_len + 1));   
   memcpy(retval, output_vec->data, sizeof(char) * output_len);
   vectorChar_destroy(op_stack);
   vectorChar_destroy(output_vec);
-
-  printf("%s", retval);
+  retval[output_len] = '\0';
 
   return retval;
 }
