@@ -1,4 +1,5 @@
 #include "vector_char.h"
+
 #include <stdlib.h>
 #include <string.h>
 

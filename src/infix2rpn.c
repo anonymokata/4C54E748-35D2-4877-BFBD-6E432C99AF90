@@ -1,51 +1,11 @@
+#include "infix2rpn.h"
+#include "infix_rpn_common.h"
+#include "vector_char.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-#include "infix2rpn.h"
-#include "vector_char.h"
-
-static int infix2rpn_getPrecedence(char c)
-{
-  switch(c)
-  {
-    case '^':
-      return 5;
-    case '/':
-      return 4;
-    case '*':
-      return 3;
-    case '-':
-      return 2;
-    case '+':
-      return 1;
-    case '(':
-      return 0;
-  }
-}
-
-static int infix2rpn_isOperator(char c)
-{
-  if(c == '^' || c == '/' || c == '*' ||
-     c == '-' || c == '+')
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-void printVector(vector_char vec)
-{
-  for(int i = 0; i < vectorChar_size(vec); ++i)
-  {
-    printf("%c ", vectorChar_element(vec, i));
-  }
-  printf("\n");
-}
 
 void infix2rpn_getPrecedencePair(vector_char vec, char token, int * prec_top, 
   int * prec_token)
@@ -53,8 +13,8 @@ void infix2rpn_getPrecedencePair(vector_char vec, char token, int * prec_top,
   if(vectorChar_size(vec) > 0)
   {
     char vector_top = vectorChar_element(vec, vectorChar_size(vec) - 1);
-    *prec_top = infix2rpn_getPrecedence(vector_top);
-    *prec_token = infix2rpn_getPrecedence(token);
+    *prec_top = infix_rpn_common_getPrecedence(vector_top);
+    *prec_token = infix_rpn_common_getPrecedence(token);
   }
   else
   {
@@ -76,7 +36,7 @@ const char * infix2rpn_convert(const char * input, int input_len)
   {
     char token = input[i];
 
-    if(infix2rpn_isOperator(token))
+    if(infix_rpn_common_isOperator(token))
     {
       int prec_top;
       int prec_token;
