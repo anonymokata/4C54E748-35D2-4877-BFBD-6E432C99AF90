@@ -113,6 +113,7 @@ const char * rpn2infix_convert(const char * input, int input_len)
   const char * retval = (const char *)
     vectorRefType_element(visitor_stack, 0);
   vectorRefType_destroy(visitor_stack);
+  vectorChar_destroy(operators);
 
   return retval;
 }

@@ -4,12 +4,14 @@
 #include <stdio.h>
 #include <check.h>
 #include <string.h>
+#include <stdlib.h>
 
 static void check_infix2rpn(const char * input_str, const char * gold_result)
 {
   const char * converted = infix2rpn_convert(
     input_str, strlen(input_str));
   ck_assert_str_eq(converted, gold_result);
+  free((void *) converted);
 }
 
 START_TEST (test0_forward)
@@ -72,6 +74,7 @@ static void check_rpn2infix(const char * input_str, const char * gold_result)
   const char * converted = rpn2infix_convert(
     input_str, strlen(input_str));
   ck_assert_str_eq(converted, gold_result);
+  free((void *) converted);
 }
 
 START_TEST (test0_reverse)
